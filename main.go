@@ -10,9 +10,13 @@ import (
 func main() {
 	router := gin.Default()
 
-	router.LoadHTMLFiles("views/*")
-	router.StaticFS("/static", http.Dir("views"))
-	router.GET("/oauth/redirect", controllers.HandleOAuthRedirect)
+	router.LoadHTMLGlob("views/*")
+	router.StaticFS("static", http.Dir("static"))
+
+	router.GET("/login", controllers.HandleLogin)
+	router.POST("/auth/callback", controllers.HandleOAuthCallback)
+	router.POST("/auth/token", controllers.HandleTokenRequest)
+	router.GET("/api/name")
 
 	router.Run(":8080")
 }
