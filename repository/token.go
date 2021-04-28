@@ -13,7 +13,7 @@ var (
 )
 
 func init() {
-	dbInstance, err := gorm.Open(sqlite.Open("oauth2.sql"), &gorm.Config{})
+	dbInstance, err := gorm.Open(sqlite.Open("../oauth2.sql"), &gorm.Config{})
 
 	if err != nil {
 		panic(err)
