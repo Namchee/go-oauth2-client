@@ -9,7 +9,9 @@
 <body>
     <script>
         window.addEventListener('DOMContentLoaded', () => {
-            const search = new URLSearchParams();
+            const search = new URLSearchParams(
+                document.location.search,
+            );
             const code = search.get('auth_code');
 
             fetch('/auth/token', {
@@ -23,10 +25,10 @@
             })
             .then(res => res.json())
             .then(res => {
-                const sessionToken = res['session_token'];
+                const sessionToken = res['data']['session_token'];
 
                 localStorage.setItem('token', sessionToken);
-                window.location = '/static/authorized';
+                window.location = '/static/authorized.html';
             }) 
             .catch(err => console.error(err));
         });

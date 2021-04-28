@@ -20,7 +20,7 @@ func init() {
 	credentials := utils.GetCredentials()
 
 	authConfig = &oauth2.Config{
-		RedirectURL:  "http://localhost:8080/auth/callback",
+		RedirectURL:  "http://localhost:8080/oauth/redirect",
 		ClientID:     credentials.ClientId,
 		ClientSecret: credentials.ClientSecret,
 		Scopes:       []string{"user"},
@@ -64,7 +64,7 @@ func GetSessionToken(authCode string) (string, error) {
 	return tokenMap.SessionToken, nil
 }
 
-func GetAuthToken(sessionToken string) (string, error) {
+func GetAccessToken(sessionToken string) (string, error) {
 	tokenMap, err := repository.GetToken(sessionToken)
 
 	if err != nil {

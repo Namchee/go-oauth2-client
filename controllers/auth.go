@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/namchee/go-oauth2-client/repository"
 	"github.com/namchee/go-oauth2-client/services"
 )
 
@@ -32,7 +31,8 @@ func HandleLogin(ctx *gin.Context) {
 func HandleOAuthCallback(ctx *gin.Context) {
 	var callbackValue OAuth2CallbackForm
 
-	ctx.BindJSON(&callbackValue)
+	callbackValue.State = ctx.Query("state")
+	callbackValue.Code = ctx.Query("code")
 
 	if !services.ValidateState(callbackValue.State) {
 		ctx.HTML(http.StatusForbidden, "/unauthorized", gin.H{
@@ -40,7 +40,7 @@ func HandleOAuthCallback(ctx *gin.Context) {
 		})
 	}
 
-	redirectUrl := fmt.Sprintf("/callback?auth_code=%s", callbackValue.Code)
+	redirectUrl := fmt.Sprintf("/static/callback.html?auth_code=%s", callbackValue.Code)
 
 	ctx.Redirect(http.StatusTemporaryRedirect, redirectUrl)
 }
@@ -77,10 +77,12 @@ func GetName(ctx *gin.Context) {
 		})
 	}
 
+	fmt.Println(authHeader)
+
 	tokens := strings.Split(authHeader, " ")
 	sessionToken := tokens[1]
 
-	tokenMap, err := repository.GetToken(sessionToken)
+	accessToken, err := services.GetAccessToken(sessionToken)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -89,7 +91,7 @@ func GetName(ctx *gin.Context) {
 		})
 	}
 
-	name, err := services.GetUsername(tokenMap.AccessToken)
+	name, err := services.GetUsername(accessToken)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
