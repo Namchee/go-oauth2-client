@@ -1,8 +1,12 @@
 # GoLang OAuth2-Secured App Sample
 
-A simple sample app to demonstrate authentication with OAuth2 written on GoLang. Made for learning purposes only.
+A simple sample app to connect with your GitHub account. Made to demonstrate authentication with OAuth2 written on GoLang.
+
+Made for learning purposes only.
 
 ## Installation
+
+> Make sure that you have registered the app on your GitHub account! [Here's how](https://github.com/settings/applications/new).
 
 1. Clone this repository.
 2. Run `go mod get` from your terminal
