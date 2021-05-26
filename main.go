@@ -12,10 +12,9 @@ func main() {
 
 	router.StaticFS("static", http.Dir("static"))
 
+	router.GET("/login", controllers.HandleLogin)
 	router.GET("/oauth/redirect", controllers.HandleOAuthCallback)
 
-	router.GET("/login", controllers.HandleLogin)
-	router.POST("/auth/token", controllers.HandleTokenRequest)
 	router.POST("/logout", controllers.HandleLogout)
 
 	router.GET("/api/name", controllers.GetName)
