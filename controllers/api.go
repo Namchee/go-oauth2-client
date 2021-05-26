@@ -2,32 +2,32 @@ package controllers
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/namchee/go-oauth2-client/services"
 )
 
 func GetName(ctx *gin.Context) {
-	authHeader := ctx.Request.Header.Get("Authorization")
+	auth, err := ctx.Request.Cookie("Authorization")
 
-	if authHeader == "" {
+	if err != nil || auth.Value == "" {
 		ctx.JSON(http.StatusForbidden, gin.H{
 			"data":  nil,
 			"error": "No token, no access lmao",
 		})
+
+		return
 	}
 
-	tokens := strings.Split(authHeader, " ")
-	sessionToken := tokens[1]
-
-	token, err := services.MapToken(sessionToken)
+	token, err := services.MapToken(auth.Value)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"data":  nil,
 			"error": "Cannot authorize request",
 		})
+
+		return
 	}
 
 	name, err := services.GetUsername(token.AccessToken)
@@ -37,6 +37,8 @@ func GetName(ctx *gin.Context) {
 			"data":  nil,
 			"error": "Cannot get username",
 		})
+
+		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{

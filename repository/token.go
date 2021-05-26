@@ -72,3 +72,11 @@ func RefreshToken(
 
 	return token, nil
 }
+
+func DeleteToken(
+	sessionToken string,
+) error {
+	db.Delete(&models.Token{}, sessionToken)
+
+	return nil
+}

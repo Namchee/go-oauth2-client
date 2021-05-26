@@ -17,5 +17,7 @@ func ConnectToDb() (gorm.DB, error) {
 }
 
 func MigrateDb(db gorm.DB) {
-	db.AutoMigrate(&models.Token{})
+	// demo purposes, don't do this
+	db.Migrator().DropTable(&models.Token{})
+	db.Migrator().CreateTable(&models.Token{})
 }

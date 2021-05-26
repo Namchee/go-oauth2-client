@@ -34,9 +34,12 @@ func HandleOAuthCallback(ctx *gin.Context) {
 	callbackValue.Code = ctx.Query("code")
 
 	if !services.ValidateState(callbackValue.State) {
-		ctx.HTML(http.StatusForbidden, "/unauthorized", gin.H{
-			"reason": "State mismatched!",
+		ctx.JSON(http.StatusForbidden, gin.H{
+			"data":  nil,
+			"error": "State mismatched!",
 		})
+
+		return
 	}
 
 	redirectUrl := fmt.Sprintf("/static/callback.html?auth_code=%s", callbackValue.Code)
@@ -56,12 +59,40 @@ func HandleTokenRequest(ctx *gin.Context) {
 			"data":  nil,
 			"error": "Failed to create session token",
 		})
+
+		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"data": map[string]string{
-			"session_token": sessionToken,
-		},
-		"error": nil,
-	})
+	// one week
+	// handle the cleanup yourself!
+	ctx.SetCookie("Authorization", sessionToken, 60*60*24*7, "/", "localhost:8080", true, true)
+	ctx.SetSameSite(http.SameSiteLaxMode)
+
+	ctx.Status(http.StatusNoContent)
+}
+
+func HandleLogout(ctx *gin.Context) {
+	auth, err := ctx.Request.Cookie("Authorization")
+
+	if err != nil || auth.Value == "" {
+		ctx.JSON(http.StatusForbidden, gin.H{
+			"data":  nil,
+			"error": "Cannot authenticate request",
+		})
+
+		return
+	}
+
+	if err := services.Logout(auth.Value); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"data":  nil,
+			"error": "Failed to logout",
+		})
+
+		return
+	}
+
+	redirectUrl := "http://localhost:8080/static"
+
+	ctx.Redirect(http.StatusTemporaryRedirect, redirectUrl)
 }

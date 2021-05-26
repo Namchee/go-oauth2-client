@@ -16,6 +16,7 @@ func main() {
 
 	router.GET("/login", controllers.HandleLogin)
 	router.POST("/auth/token", controllers.HandleTokenRequest)
+	router.POST("/logout", controllers.HandleLogout)
 
 	router.GET("/api/name", controllers.GetName)
 

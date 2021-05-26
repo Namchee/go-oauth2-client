@@ -25,10 +25,12 @@
             })
             .then(res => res.json())
             .then(res => {
-                const sessionToken = res['data']['session_token'];
+                if (res.status === 204) {
+                    window.location = '/static/authorized.html';
+                    return;
+                }
 
-                localStorage.setItem('token', sessionToken);
-                window.location = '/static/authorized.html';
+                throw res['error'];
             }) 
             .catch(err => console.error(err));
         });

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"log"
 	"time"
 
@@ -46,13 +47,21 @@ func ValidateState(state string) bool {
 }
 
 func GetSessionToken(authCode string) (string, error) {
-	token, err := authConfig.Exchange(oauth2.NoContext, authCode)
+	token, err := authConfig.Exchange(
+		context.TODO(),
+		authCode,
+		oauth2.AccessTypeOffline, // ensures refresh token availability
+	)
 
 	if err != nil {
 		return "", err
 	}
 
 	sessionToken, err := utils.GenerateRandomString()
+
+	if err != nil {
+		return "", err
+	}
 
 	now := time.Now()
 
@@ -78,7 +87,7 @@ func MapToken(sessionToken string) (models.Token, error) {
 		TokenType:    "Bearer",
 	}
 
-	tokenSource := authConfig.TokenSource(oauth2.NoContext, &oauthToken)
+	tokenSource := authConfig.TokenSource(context.TODO(), &oauthToken)
 	token, err := tokenSource.Token()
 
 	if err != nil {
@@ -102,4 +111,10 @@ func MapToken(sessionToken string) (models.Token, error) {
 	}
 
 	return tokenMap, nil
+}
+
+func Logout(sessionToken string) error {
+	repository.DeleteToken(sessionToken)
+
+	return nil
 }

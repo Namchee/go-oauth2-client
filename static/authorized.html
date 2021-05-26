@@ -9,24 +9,37 @@
 <body>
     <script>
         window.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('token');
+            fetch('/api/name', { credentials: true })
+                .then(res => res.json())
+                .then(res => {
+                    const name = res['data']['name'];
 
-            fetch('/api/name', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            })
-            .then(res => res.json())
-            .then(res => {
-                const name = res['data']['name'];
+                    const p = document.createElement('p');
+                    p.textContent = `Welcome ${name}`;
 
-                const p = document.createElement('p');
-                p.textContent = `Welcome ${name}`;
+                    document.body.appendChild(p);
+                })
+                .catch(err => console.error(err));
+            },
+        );
 
-                document.body.appendChild(p);
-            })
-            .catch(err => console.error(err));
-        });
+        function logout() {
+            fetch("/api/logout", { credentials: true })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 200) {
+                        window.location = '/static';
+                        return;
+                    }
+
+                    throw res['error'];
+                })
+                .catch(err => console.error(err)); 
+        }
     </script>
+
+    <button onclick="logout()">
+        Logout
+    </button>
 </body>
 </html>
