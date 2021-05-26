@@ -2,9 +2,10 @@ package models
 
 import "time"
 
-type TokenMap struct {
-	ID           uint       `json:"id" gorm:"primaryKey"`
-	SessionToken string     `json:"session_token" gorm:"index" gorm:"unique"`
-	AccessToken  string     `json:"access_token" gorm:"unique"`
-	CreatedAt    *time.Time `json:"created_at"`
+type Token struct {
+	SessionToken string     `json:"session_token" gorm:"primaryKey"`
+	AccessToken  string     `json:"access_token" gorm:"unique; not null"`
+	RefreshToken string     `json:"refresh_token" gorm:"unique"`
+	TimeToLive   *time.Time `json:"time_to_live"`
+	UpdatedAt    *time.Time `json:"updated_at"`
 }

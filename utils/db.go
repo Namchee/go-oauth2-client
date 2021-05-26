@@ -17,5 +17,5 @@ func ConnectToDb() (gorm.DB, error) {
 }
 
 func MigrateDb(db gorm.DB) {
-	db.AutoMigrate(&models.TokenMap{})
+	db.AutoMigrate(&models.Token{})
 }

@@ -3,7 +3,6 @@ package controllers
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/namchee/go-oauth2-client/services"
@@ -62,47 +61,6 @@ func HandleTokenRequest(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"data": map[string]string{
 			"session_token": sessionToken,
-		},
-		"error": nil,
-	})
-}
-
-func GetName(ctx *gin.Context) {
-	authHeader := ctx.Request.Header.Get("Authorization")
-
-	if authHeader == "" {
-		ctx.JSON(http.StatusForbidden, gin.H{
-			"data":  nil,
-			"error": "No token, no access lmao",
-		})
-	}
-
-	fmt.Println(authHeader)
-
-	tokens := strings.Split(authHeader, " ")
-	sessionToken := tokens[1]
-
-	accessToken, err := services.GetAccessToken(sessionToken)
-
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"data":  nil,
-			"error": "Cannot authorize request",
-		})
-	}
-
-	name, err := services.GetUsername(accessToken)
-
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"data":  nil,
-			"error": "Cannot get username",
-		})
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"data": map[string]string{
-			"name": name,
 		},
 		"error": nil,
 	})

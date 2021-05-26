@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/namchee/go-oauth2-client/models"
 	"github.com/namchee/go-oauth2-client/repository"
 	"github.com/namchee/go-oauth2-client/utils"
 	"golang.org/x/oauth2"
@@ -55,7 +56,7 @@ func GetSessionToken(authCode string) (string, error) {
 
 	now := time.Now()
 
-	tokenMap, err := repository.CreateNewToken(sessionToken, token.AccessToken, &now)
+	tokenMap, err := repository.CreateNewToken(sessionToken, token, &now)
 
 	if err != nil {
 		return "", err
@@ -64,12 +65,41 @@ func GetSessionToken(authCode string) (string, error) {
 	return tokenMap.SessionToken, nil
 }
 
-func GetAccessToken(sessionToken string) (string, error) {
+func MapToken(sessionToken string) (models.Token, error) {
 	tokenMap, err := repository.GetToken(sessionToken)
 
 	if err != nil {
-		return "", err
+		return tokenMap, err
 	}
 
-	return tokenMap.AccessToken, nil
+	oauthToken := oauth2.Token{
+		AccessToken:  tokenMap.AccessToken,
+		RefreshToken: tokenMap.RefreshToken,
+		TokenType:    "Bearer",
+	}
+
+	tokenSource := authConfig.TokenSource(oauth2.NoContext, &oauthToken)
+	token, err := tokenSource.Token()
+
+	if err != nil {
+		return tokenMap, err
+	}
+
+	if token != &oauthToken {
+		now := time.Now()
+
+		newTokenMap, err := repository.RefreshToken(
+			tokenMap.SessionToken,
+			token.AccessToken,
+			&now,
+		)
+
+		if err != nil {
+			return newTokenMap, err
+		}
+
+		tokenMap = newTokenMap
+	}
+
+	return tokenMap, nil
 }
